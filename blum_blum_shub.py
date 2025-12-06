@@ -24,12 +24,12 @@ def blum_blum_shub(p: int, q: int, seed: int, iterations: int) -> list[int]:
     numbers = []
     for _ in range(iterations):
         x =  pow(x, 2, n)
-        b.append(x % 2)
+        b.append(x % 2) 
         numbers.append(x)
         
     return b
 
-#Using array of bits from blum_blum_shub method to build a random integer of exact bit length
+#Using array of bits from blum_blum_shub method to build a random integer
 def random_int_from_bbs(p: int, q: int, seed: int, bit_length: int) -> int:
     """
     Build a random integer of exact 'bit_length' bits
@@ -45,29 +45,35 @@ def random_int_from_bbs(p: int, q: int, seed: int, bit_length: int) -> int:
         value |= (bits[i] << i)
     return value
 
-
 # Miller-Rabin Primality Test
-# This is a probabilistic test to check if a number is prime
-def miller_rabin(n: int, k: int = 10) -> bool:
-    if n <= 1 or n == 4:
+# if n is prime then a^(n-1) ≡ 1 (mod n)
+# for n, n-1 = 2^r * d
+def miller_rabin(n: int, testIterations: int = 10) -> bool:
+    if n <= 1:
         return False
     if n <= 3:
         return True
+    if n % 2 == 0:
+        return False  # even and > 2
+    
+    d = n - 1 # because 2r * d
+    r = 0 
 
-    d = n - 1
-    r = 0
-    while d % 2 == 0:
+    while d % 2 == 0: # find r and d  where d is odd
         d = math.floor(d / 2)
         r += 1
 
-    for _ in range(k):
-        a = random.randint(2, n - 2)
-        x = pow(a, d, n)
-        if x == 1 or x == n - 1:
+    for _ in range(testIterations):
+        a = random.randint(2, n - 2) #pick a random 'a' in [2, n-2]
+        x = pow(a, d, n) # compute a^d % n
+
+        if x == 1 or x == n - 1: # pass
             continue
-        for _ in range(r - 1):
-            x = pow(x, 2, n)
-            if x == n - 1:
+
+        for _ in range(r - 1): 
+            x = pow(x, 2, n)  # check if the square of x is n-1
+            
+            if x == n - 1: # 
                 break
         else:
             return False
@@ -86,4 +92,6 @@ def bbs_prime(bit_length: int, p: int, q: int, seed: int) -> int:
         # change the seed slightly 
         seed += 1
         
-print(bbs_prime(256, 30000000091, 40000000003, 4882516702))  # Example usage
+#print(bbs_prime(256, 30000000091, 40000000003, 4882516702))  # Example usage
+
+print(miller_rabin(101))  # Example usage
