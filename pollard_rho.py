@@ -1,6 +1,5 @@
 import math
 
-
 def factor_pollard_p1(n: int, B: int) -> int:
     a = 2
     j = 2

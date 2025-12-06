@@ -44,7 +44,7 @@ class User:
     
 
     
-keys = User(32)
+keys = User(64)
 keys.generate_rsa_keys()
 keys.print_public_key()
 keys.print_private_keys()
