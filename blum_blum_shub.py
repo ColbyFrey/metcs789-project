@@ -1,6 +1,10 @@
 import math
 import random
 
+SMALL_PRIMES = [3, 5, 7, 11, 13, 17, 19, 23,
+                29, 31, 37, 41, 43, 47, 53, 59]
+
+
 class BlumBlumShub:
     def __init__(self, int_size_bits: int):
         """
@@ -11,24 +15,28 @@ class BlumBlumShub:
         """
         self.bits = int_size_bits
         self.p, self.q, self.n, self.seed = self.bbs_keygen(int_size_bits)
+        
+        
 
     # --------------------------
     # Miller-Rabin
     # --------------------------
     @staticmethod
-    def miller_rabin(n: int, testIterations: int = 4) -> bool:
+    def miller_rabin(n: int, testIterations: int = 8) -> bool:
         if n <= 1:
             return False
         if n <= 3:
             return True
         if n % 2 == 0:
             return False  # even and > 2
+        if n % 3 == 0:
+            return False  # divisible by 3
 
         d = n - 1  # because 2^r * d
         r = 0
 
         while d % 2 == 0:  # find r and d where d is odd
-            d = math.floor(d / 2)
+            d //= 2
             r += 1
 
         for _ in range(testIterations):
@@ -61,12 +69,18 @@ class BlumBlumShub:
             candidate = random.getrandbits(bit_length)
             candidate |= (1 << (bit_length - 1))  # ensure correct bit length
             candidate |= 3                        # force ≡ 3 (mod 4)
+            
+            if candidate % 4 != 3:
+                continue                
 
             if cls.miller_rabin(candidate):
+                print(f"Generated {bit_length}-bit Blum prime {candidate} after {attempts} attempts")
                 return candidate
+            else:
+                print(f"candidate {candidate} failed primality test")
 
     # --------------------------
-    # BBS bit generator (instance-based)
+    # BBS bit generator 
     # --------------------------
     def blum_blum_shub(self, iterations: int) -> list[int]:
         """
@@ -93,25 +107,37 @@ class BlumBlumShub:
             b.append(x % 2)
             numbers.append(x)
 
+        self.seed = x  # update seed for next call
         return b
 
     # --------------------------
-    # Random int from BBS bits (instance-based)
+    # Random int from BBS bits 
     # --------------------------
-    def random_int_from_bbs(self, bit_length: int) -> int:
+    def random_prime_from_bbs(self, bit_length: int) -> int:
         """
         Build a random integer of exact 'bit_length' bits using the instance's parameters.
         """
-        bits = self.blum_blum_shub(bit_length)
 
         # Set the most significant bit to ensure correct bit length
-        value = 1 << (bit_length - 1)
+        
+        while True:
+            bits = self.blum_blum_shub(bit_length)
+            value = 1 << (bit_length - 1)
 
-        # Fill remaining bits
-        for i in range(bit_length - 1):
-            value |= (bits[i] << i)
+            # Fill remaining bits
+            for i in range(bit_length - 1):
+                value |= (bits[i] << i)
+            
+            value |= 1  # ensure odd
+            
+            # quick small prime filter
+            if any(value % sp == 0 for sp in SMALL_PRIMES):
+                continue
+            
+            if self.miller_rabin(value):
+                return value
 
-        return value
+        return None
 
     # --------------------------
     # BBS Keygen (class-level, used in __init__)
