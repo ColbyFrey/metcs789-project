@@ -67,7 +67,6 @@ def encrypt_message(n, e):
     
     return c
 
-
 def main():
     print("RSA Program for A (Sender)")
     print("\nA gets public key from B, encrypts, sends ciphertext")
