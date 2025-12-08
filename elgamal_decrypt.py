@@ -11,10 +11,15 @@ def egcd(a: int, b: int):
 
 
 def modinv(a: int, m: int) -> int:
-    g, x, _ = egcd(a % m, m)
+    """Modular inverse of a modulo m. Raises ValueError if inverse does not exist."""
+    # Ensure a is in range [0, m)
+    a = a % m
+    g, x, _ = egcd(a, m)
     if g != 1:
         raise ValueError(f"No modular inverse for {a} mod {m}")
-    return x % m
+    # Ensure result is positive
+    result = x % m
+    return result
 
 
 @dataclass
@@ -30,6 +35,13 @@ def elgamal_decrypt(ciphertext, priv: ElGamalPrivateKey) -> int:
     s = pow(c1, priv.x, p)
     s_inv = modinv(s, p)
     m = (c2 * s_inv) % p
+    # Debug output
+    print(f"[DEBUG] Decryption steps:")
+    print(f"  c1 = {c1}, c2 = {c2}")
+    print(f"  p = {p}, x (private key) = {priv.x}")
+    print(f"  s = c1^x mod p = {c1}^{priv.x} mod {p} = {s}")
+    print(f"  s_inv = modinv({s}, {p}) = {s_inv}")
+    print(f"  m = (c2 * s_inv) mod p = ({c2} * {s_inv}) mod {p} = {m}")
     return m
 
 
@@ -61,9 +73,13 @@ def interactive_decrypt():
         c2 = int(input("c2: "))
         
         # Try to find private key x from public key y
+        print(f"[DEBUG] Finding private key x such that {g}^x mod {p} = {y}")
         x = find_private_key(p, g, y)
         if x is None:
             raise ValueError(f"Cannot derive private key (prime too large). For decryption, you need the private key x.")
+        
+        print(f"[DEBUG] Found private key x = {x}")
+        print(f"[DEBUG] Verification: {g}^{x} mod {p} = {pow(g, x, p)} (should equal {y})")
         
         priv = ElGamalPrivateKey(p=p, g=g, x=x)
         ciphertext = (c1, c2)
