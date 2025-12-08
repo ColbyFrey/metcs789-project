@@ -12,10 +12,14 @@ def egcd(a: int, b: int):
 
 def modinv(a: int, m: int) -> int:
     """Modular inverse of a modulo m. Raises ValueError if inverse does not exist."""
-    g, x, _ = egcd(a % m, m)
+    # Ensure a is in range [0, m)
+    a = a % m
+    g, x, _ = egcd(a, m)
     if g != 1:
         raise ValueError(f"No modular inverse for {a} mod {m}")
-    return x % m
+    # Ensure result is positive
+    result = x % m
+    return result
 
 @dataclass
 class ElGamalPrivateKey:
@@ -40,6 +44,13 @@ def elgamal_decrypt(ciphertext, priv: ElGamalPrivateKey) -> int:
     s = pow(c1, priv.x, p)
     s_inv = modinv(s, p)
     m = (c2 * s_inv) % p
+    # Debug output
+    print(f"[DEBUG] Decryption steps:")
+    print(f"  c1 = {c1}, c2 = {c2}")
+    print(f"  p = {p}, x (private key) = {priv.x}")
+    print(f"  s = c1^x mod p = {c1}^{priv.x} mod {p} = {s}")
+    print(f"  s_inv = modinv({s}, {p}) = {s_inv}")
+    print(f"  m = (c2 * s_inv) mod p = ({c2} * {s_inv}) mod {p} = {m}")
     return m
 
 
@@ -70,7 +81,7 @@ def demo_receive_integer():
         g_input = input("Enter g (or press Enter for default 2): ").strip()
         g = int(g_input) if g_input else 2
         
-        x_input = input("Enter x (private key - REQUIRED): ").strip()
+        x_input = input("Enter x): ").strip()
         if not x_input:
             raise ValueError("Private key x is required!")
         x = int(x_input)
