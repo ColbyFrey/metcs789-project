@@ -3,8 +3,7 @@ import math
 def factor_pollard_p1(n: int, B: int) -> int:
     a = 2
     j = 2
-    while j <= B:
-        
+    for _ in range(2, B + 1): 
         a = pow(a,j,n)
         
         d  = math.gcd(a - 1, n)
