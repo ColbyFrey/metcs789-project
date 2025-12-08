@@ -11,8 +11,9 @@ Choose your encryption method: **RSA** or **ElGamal**
 **C (Interceptor):** Run `python rsa_c.py` - Enter intercepted public key and ciphertext, try to decrypt
 
 ## ElGamal
+**A (Receiver):** Generate public keys using the generate_public_private_keys method in `python elgamal_sending_project.py` - publish p,g,y
 
-**A (Sender):** Run `python elgamal_sending_project.py` - Copy the public key (p, g, y) and ciphertext (c1, c2), send to B
+**A (Sender):**  Using the send_message method in `python elgamal_sending_project.py` send an interger using A's publick keys- send ciphertext (c1, c2), send to B
 
 **B (Receiver):** Run `python elgamal_receiving_project.py` - Enter the public key and ciphertext from A, decrypt the message
 
