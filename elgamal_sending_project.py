@@ -1,5 +1,4 @@
 import secrets
-import string
 from dataclasses import dataclass
 
 def egcd(a: int, b: int):
@@ -24,6 +23,7 @@ class ElGamalPublicKey:
     p: int 
     g: int  
     y: int  
+
 
 @dataclass
 class ElGamalPrivateKey:
@@ -78,69 +78,20 @@ def decode_int_to_string(n: int) -> str:
     length = (n.bit_length() + 7) // 8
     return n.to_bytes(length, byteorder="big").decode("utf-8")
 
-def demo_integer_message():
-    p = 467       
-    g = 2       
-    pub, priv = elgamal_keygen(p, g)
-
-    print(f"Public key:  p={pub.p}, g={pub.g}, y={pub.y}")
-    print(f"Private key: x={priv.x}")
-
-    message = secrets.randbelow(p - 1) + 1 
-    print(f"\nOriginal message m = {message}")
-
-    c = elgamal_encrypt(message, pub)
-    print(f"Ciphertext (c1, c2) = {c}")
-
-    m_recovered = elgamal_decrypt(c, priv)
-    print(f"Decrypted message  = {m_recovered}")
-
-
-def demo_string_message():
-    p = 2**255 - 19
+if __name__ == "__main__":
+    
+    p = 2**127 - 1
     g = 3
     pub, priv = elgamal_keygen(p, g)
-    sentences = [
-        "Hello world!",
-        "Secret message here.",
-        "Python is great.",
-        "Data is secure now.",
-        "Nice weather today.",
-        "I love cryptography.",
-        "ElGamal encryption works!",
-        "Math is very fun.",
-        "Code should be clean.",
-        "Use strong encryption.",
-        "The fox jumps high.",
-        "Learning is awesome.",
-        "Security matters most.",
-        "Keep data protected.",
-        "Encrypt everything safely."
-    ]
     
-    valid_sentences = []
-    for sentence in sentences:
-        m_int = encode_string_to_int(sentence)
-        if m_int < p:
-            valid_sentences.append(sentence)
+    message = secrets.randbelow(p - 1) + 1
     
-    if not valid_sentences:
-        raise ValueError("No sentences fit in the prime size!")
+    c1, c2 = elgamal_encrypt(message, pub)
     
-    msg = secrets.choice(valid_sentences)
-    m_int = encode_string_to_int(msg)
-
-    print(f"Original string: {msg}")
-    print(f"Encoded as int:  {m_int}")
-
-    c = elgamal_encrypt(m_int, pub)
-    print(f"Ciphertext (c1, c2) = {c}")
-
-    m_recovered = elgamal_decrypt(c, priv)
-    msg_recovered = decode_int_to_string(m_recovered)
-    print(f"Decrypted int:     {m_recovered}")
-    print(f"Decrypted string:  {msg_recovered}")
-
-if __name__ == "__main__":
-    demo_integer_message()
-    demo_string_message()
+    # Output: message, c1, c2, p, g, x
+    print(f"message={message}")
+    print(f"c1={c1}")
+    print(f"c2={c2}")
+    print(f"p={p}")
+    print(f"g={g}")
+    print(f"x={priv.x}")
