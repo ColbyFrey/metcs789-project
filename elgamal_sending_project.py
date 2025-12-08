@@ -80,18 +80,20 @@ def decode_int_to_string(n: int) -> str:
 
 if __name__ == "__main__":
     
-    p = 2**127 - 1
-    g = 3
+    p = 467  # Small prime to allow private key derivation
+    g = 2
     pub, priv = elgamal_keygen(p, g)
     
     message = secrets.randbelow(p - 1) + 1
     
     c1, c2 = elgamal_encrypt(message, pub)
     
-    # Output: message, c1, c2, p, g, x
+    # Output: message, c1, c2, p, g, y (public values)
     print(f"message={message}")
     print(f"c1={c1}")
     print(f"c2={c2}")
     print(f"p={p}")
     print(f"g={g}")
     print(f"x={priv.x}")
+    print(f"y={pub.y}")
+
