@@ -14,7 +14,7 @@ Choose your encryption method: **RSA** or **ElGamal**
 
 **A (Sender):** Run `python elgamal_sending_project.py` - Copy the public key (p, g, y) and ciphertext (c1, c2), send to B
 
-**B (Receiver):** Run `python elgamal_decrypt.py` - Enter the public key and ciphertext from A, decrypt the message
+**B (Receiver):** Run `python elgamal_sending_project.py` - Enter the public key and ciphertext from A, decrypt the message
 
 **C (Interceptor):** Run `python elgamal_decrypt.py` - Enter intercepted public key and ciphertext, try to find the private key and decrypt
 
