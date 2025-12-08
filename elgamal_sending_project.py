@@ -78,22 +78,43 @@ def decode_int_to_string(n: int) -> str:
     length = (n.bit_length() + 7) // 8
     return n.to_bytes(length, byteorder="big").decode("utf-8")
 
-if __name__ == "__main__":
-    
-    p = 467  # Small prime to allow private key derivation
-    g = 2
+def Alice_ElGamal(m,p,g,B):
+    a = secrets.randbelow(p - 2) + 1
+    A = pow(g, a, p)
+    s = pow(B, a, p)
+    X = (m * s) % p
+    return A,X
+
+def generate_public_private_keys(p: int, g: int):
     pub, priv = elgamal_keygen(p, g)
-    
-    message = secrets.randbelow(p - 1) + 1
-    
-    c1, c2 = elgamal_encrypt(message, pub)
-    
-    # Output: message, c1, c2, p, g, y (public values)
-    print(f"message={message}")
-    print(f"c1={c1}")
-    print(f"c2={c2}")
     print(f"p={p}")
     print(f"g={g}")
     print(f"x={priv.x}")
     print(f"y={pub.y}")
+    return pub, priv
+
+def send_message(msg: int, pub: ElGamalPublicKey):
+    c1, c2 = elgamal_encrypt(msg, pub)    
+    print(f"message={msg}")
+    print(f"c1={c1}")
+    print(f"c2={c2}")
+    return c1, c2
+
+def send_random_int_message(pub: ElGamalPublicKey):
+    msg = secrets.randbelow(pub.p - 1) + 1
+    return send_message(msg, pub)
+
+if __name__ == "__main__":
+    
+    print("Alice ElGamal Demo")
+    A,X = Alice_ElGamal(68, 467, 2, 363)
+    print(f"Alice sends: A={A}, X={X}")
+    
+    p = 467  # Small prime to allow private key derivation
+    g = 2
+    pub, priv = generate_public_private_keys(p, g)
+    
+    
+    
+
 

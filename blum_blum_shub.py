@@ -16,8 +16,6 @@ class BlumBlumShub:
         self.bits = int_size_bits
         self.p, self.q, self.n, self.seed = self.bbs_keygen(int_size_bits)
         
-        
-
     # --------------------------
     # Miller-Rabin
     # --------------------------
@@ -67,8 +65,8 @@ class BlumBlumShub:
                 print(f"tried {attempts} candidates for {bit_length}-bit prime...")
 
             candidate = random.getrandbits(bit_length)
-            candidate |= (1 << (bit_length - 1))  # ensure correct bit length
-            candidate |= 3                        # force ≡ 3 (mod 4)
+            candidate |= (1 << (bit_length - 1))  # ensure correct bit length by setting MSB
+            candidate |= 3                        # force ≡ 3 (mod 4) by setting last two bits
             
             if candidate % 4 != 3:
                 continue                
