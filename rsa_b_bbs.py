@@ -1,12 +1,11 @@
+# rsa_b.py
 # RSA for B (receiver)
 # B makes keys, gives public key to A, decrypts stuff
 
 from rsa_operations import gcd, mod_inverse, mod_pow
-import secrets
-from blum_blum_shub import BlumBlumShub  
+from blum_blum_shub import BlumBlumShub  # <-- your BBS implementation
 
-DEFAULT_E = 17
-SMALL_PRIMES = [11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+DEFAULT_E = 65537  # common choice for e, matches your User class
 
 
 def get_int_input(prompt, min_val=None, max_val=None):
@@ -32,7 +31,7 @@ def get_int_input(prompt, min_val=None, max_val=None):
 
 
 def is_prime_simple(n):
-    """Simple primality test for small numbers."""
+    """Simple primality test for small numbers (used for manual p, q)."""
     if n < 2:
         return False
     if n == 2:
@@ -51,10 +50,11 @@ def generate_keys():
     print("\nB: Generate RSA Keys")
     
     print("\n1. enter primes manually")
-    print("2. generate random primes")
+    print("2. generate primes using Blum Blum Shub")
     choice = input("choice (1 or 2, default 1): ").strip() or "1"
     
     if choice == "1":
+        # ---- Manual p, q input (same as before) ----
         print("\nenter two small primes (e.g., 11, 13, 17, 19, 23):")
         p = get_int_input("p = ", min_val=2)
         if p is None:
@@ -73,11 +73,37 @@ def generate_keys():
         if p == q:
             print("error: p and q must be different")
             return None
-    else:
-        p = secrets.choice(SMALL_PRIMES)
-        q = secrets.choice([x for x in SMALL_PRIMES if x != p])
-        print(f"generated: p={p}, q={q}")
     
+    else:
+        # ---- Use your BlumBlumShub RNG to generate random primes ----
+        print("\nBlum Blum Shub prime generation")
+
+        # bit length for the RSA primes p and q
+        bit_length = get_int_input(
+            "bit length for RSA primes (e.g., 16, 32, 64, 128): ",
+            min_val=4
+        )
+        if bit_length is None:
+            return None
+
+        # Create a BBS instance; its internal p, q, n, seed are used just
+        # as the RNG state. random_prime_from_bbs() builds primes from its bits.
+        bbs = BlumBlumShub(bit_length)
+
+        # first prime
+        p = bbs.random_prime_from_bbs(bit_length)
+
+        # second prime, ensure different from p
+        while True:
+            q = bbs.random_prime_from_bbs(bit_length)
+            if q != p:
+                break
+
+        print(f"generated with BBS:")
+        print(f"  p = {p}")
+        print(f"  q = {q}")
+    
+    # ---- Same RSA math as before ----
     n = p * q
     print(f"\nn = p × q = {p} × {q} = {n}")
     
@@ -85,12 +111,12 @@ def generate_keys():
     print(f"φ(n) = (p-1) × (q-1) = {p-1} × {q-1} = {phi_n}")
     
     print("\nchoose public exponent e (common: 3, 17, 65537):")
-    e_input = input("e (or Enter for 17): ").strip()
+    e_input = input(f"e (or Enter for {DEFAULT_E}): ").strip()
     if e_input:
         try:
             e = int(e_input)
             if e < 2:
-                print(f"error: e must be >= 2")
+                print("error: e must be >= 2")
                 return None
         except ValueError:
             print("error: enter a valid integer")
