@@ -1,6 +1,8 @@
 # RSA for C (interceptor)
 # C tries to decrypt with only public info
 
+import math
+import pollard_rho
 from rsa_operations import gcd, mod_inverse, mod_pow
 
 MAX_FACTOR_SEARCH = 10000
@@ -65,8 +67,43 @@ def try_intercept():
     
     print(f"\ntrying to factor n={n}")
     found = False
-    max_search = min(int(n**0.5) + 1, MAX_FACTOR_SEARCH)
-    for i in range(2, max_search):
+   # max_search = min(int(n**0.5) + 1, MAX_FACTOR_SEARCH)
+    max_search = math.floor(math.sqrt(n) / 2)
+    p = pollard_rho.factor_pollard_p1(n, max_search)
+    print(f"max search limit: {max_search}")
+    if p is not None:
+        q = n // p
+        print(f"found: p={p}, q={q}")
+        found = True
+        
+        phi_n = (p - 1) * (q - 1)
+        print(f"φ(n) = {phi_n}")
+        
+        if gcd(e, phi_n) == 1:
+            try:
+                d = mod_inverse(e, phi_n)
+                print(f"d = {d}")
+                
+                print(f"\nC can decrypt:")
+                print(f"m = c^{d} mod {n}")
+                m = mod_pow(c, d, n)
+                print(f"decrypted: m = {m}")
+                print(f"(only works because n is small: {n})")
+                print(f"for large n, factoring is impossible")
+            except ValueError:
+                print(f"error: no modular inverse for e={e} mod φ(n)={phi_n}")
+        else:
+            print(f"gcd(e, φ(n)) != 1")
+    else:
+        print(f"can't factor n={n}")
+        if max_search >= MAX_FACTOR_SEARCH:
+            print(f"(search limited to {MAX_FACTOR_SEARCH} to prevent hanging)")
+        print(f"for real RSA (256+ bits), this is impossible")
+        print(f"RSA is secure - C can't decrypt")
+    
+"""    for i in range(2, max_search):
+
+
         if n % i == 0:
             p = i
             q = n // i
@@ -100,7 +137,7 @@ def try_intercept():
         print(f"for real RSA (256+ bits), this is impossible")
         print(f"RSA is secure - C can't decrypt")
 
-
+"""
 def main():
     print("RSA Program for C (Interceptor)")
     print("\nC intercepts public key and ciphertext, tries to decrypt")
@@ -114,6 +151,7 @@ def main():
             
             if choice == "1":
                 try_intercept()
+                print("\n---")
             
             elif choice == "2":
                 break
